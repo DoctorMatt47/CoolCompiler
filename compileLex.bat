@@ -1,2 +1,2 @@
-java -cp "f:\Programming\CoolCompiler\lib" JLex.Main "f:\Programming\CoolCompiler\src\main\lexer\sample.lex"
+java -cp "%cd%\lib" JLex.Main "%cd%\src\lexer\sample.lex"
 pause
