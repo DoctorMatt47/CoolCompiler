@@ -33,20 +33,16 @@ class Utility {
 }
 
 class Yytoken {
-  Yytoken (int index, String text, int line, int charBegin, int charEnd)
+  Yytoken (int index, String text, int line)
   {
 	m_index = index;
 	m_text = new String(text);
 	m_line = line;
-	m_charBegin = charBegin;
-	m_charEnd = charEnd;
   }
 
   public int m_index;
   public String m_text;
   public int m_line;
-  public int m_charBegin;
-  public int m_charEnd;
 
   public String toString() {
       return "Token #"+m_index+": "+m_text+" (line "+m_line+")";
@@ -56,6 +52,7 @@ class Yytoken {
 %%
 
 %line
+%char
 
 ALPHA=[A-Za-z]
 INTEGER=[0-9]*
@@ -99,46 +96,38 @@ NOT=[(?i)not]
 TRUE=[t(?i)rue]
 FALSE=[f(?i)alse)]
 
-<YYINITIAL> {NONNEWLINE_WHITE_SPACE_CHAR}+ { }
+%%
 
-<YYINITIAL,COMMENT> \n { }
+<YYINITIAL> {CLASS} { return (new Yytoken(0,yytext(),yyline)); }
+<YYINITIAL> {INHERITS} { return (new Yytoken(1,yytext(),yyline)); }
 
-<YYINITIAL> "/*" { yybegin(COMMENT); comment_count = comment_count + 1; }
+<YYINITIAL> {IF} { return (new Yytoken(2,yytext(),yyline)); }
+<YYINITIAL> {THEN} { return (new Yytoken(3,yytext(),yyline)); }
+<YYINITIAL> {ELSE} { return (new Yytoken(4,yytext(),yyline)); }
+<YYINITIAL> {FI} { return (new Yytoken(5,yytext(),yyline)); }
 
-<COMMENT> "/*" { comment_count = comment_count + 1; }
-<COMMENT> "*/" { 
-	comment_count = comment_count - 1; 
-	Utility._assert(comment_count >= 0);
-	if (comment_count == 0) {
-    		yybegin(YYINITIAL);
-	}
-}
-<COMMENT> {COMMENT_TEXT} { }
+<YYINITIAL> {WHILE} { return (new Yytoken(6,yytext(),yyline)); }
+<YYINITIAL> {LOOP} { return (new Yytoken(7,yytext(),yyline)); }
+<YYINITIAL> {POOL} { return (new Yytoken(8,yytext(),yyline)); }
 
-<YYINITIAL> \"{STRING_TEXT}\" {
-	String str =  yytext().substring(1,yytext().length() - 1);
-	
-	Utility._assert(str.length() == yytext().length() - 2);
-	return (new Yytoken(40,str,yyline,yychar,yychar + str.length()));
-}
-<YYINITIAL> \"{STRING_TEXT} {
-	String str =  yytext().substring(1,yytext().length());
+<YYINITIAL> {LET} { return (new Yytoken(9,yytext(),yyline)); }
+<YYINITIAL> {IN} { return (new Yytoken(10,yytext(),yyline)); }
 
-	Utility._error(Utility.E_UNCLOSEDSTR);
-	Utility._assert(str.length() == yytext().length() - 1);
-	return (new Yytoken(41,str,yyline,yychar,yychar + str.length()));
-} 
-<YYINITIAL> {DIGIT}+ { 
-	return (new Yytoken(42,yytext(),yyline,yychar,yychar + yytext().length()));
-}	
-<YYINITIAL> {ALPHA}({ALPHA}|{DIGIT}|_)* {
-	return (new Yytoken(43,yytext(),yyline,yychar,yychar + yytext().length()));
-}	
-<YYINITIAL,COMMENT> . {
-        System.out.println("Illegal character: <" + yytext() + ">");
-	Utility._error(Utility.E_UNMATCHED);
-}
+<YYINITIAL> {CASE} { return (new Yytoken(11,yytext(),yyline)); }
+<YYINITIAL> {OF} { return (new Yytoken(12,yytext(),yyline)); }
+<YYINITIAL> {ESAC} { return (new Yytoken(13,yytext(),yyline)); }
 
+<YYINITIAL> {NEW} { return (new Yytoken(14,yytext(),yyline)); }
+<YYINITIAL> {ISVOID} { return (new Yytoken(15,yytext(),yyline)); }
+<YYINITIAL> {NOT}  { return (new Yytoken(16,yytext(),yyline)); }
+
+<YYINITIAL> {TYPE_IDENTIFIER} { return (new Yytoken(17,yytext(),yyline)); }
+<YYINITIAL> {OBJECT_IDENTIFIER}  { return (new Yytoken(18,yytext(),yyline); }
+
+<YYINITIAL> {INTEGER} { return (new Yytoken(19,yytext(),yyline); }
+
+<YYINITIAL> {NEWLINE} {}
+<YYINITIAL> {WHITESPACE} {}
 
 
 
