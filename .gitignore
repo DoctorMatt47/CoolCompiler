@@ -25,3 +25,6 @@ replay_pid*
 
 # compiled files
 target/*
+
+# vim files
+*.swp
