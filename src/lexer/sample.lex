@@ -55,46 +55,49 @@ class Yytoken {
 
 %%
 
-%{
-  private int comment_count = 0;
-%} 
 %line
-%char
-%state COMMENT
 
 ALPHA=[A-Za-z]
-DIGIT=[0-9]
-NONNEWLINE_WHITE_SPACE_CHAR=[\ \t\b\012]
-WHITE_SPACE_CHAR=[\n\ \t\b\012]
-STRING_TEXT=(\\\"|[^\n\"]|\\{WHITE_SPACE_CHAR}+\\)*
-COMMENT_TEXT=([^/*\n]|[^*\n]"/"[^*\n]|[^/\n]"*"[^/\n]|"*"[^/\n]|"/"[^*\n])*
+INTEGER=[0-9]*
+WHITESPACE=[ \t\r\f\v]
 
+ESCAPE=\\
+NEWLINE=\n
+NULL_CHAR=\0
 
-%% 
+SELF=self
+SELF_TYPE=SELF_TYPE
 
-<YYINITIAL> "," { return (new Yytoken(0,yytext(),yyline,yychar,yychar+1)); }
-<YYINITIAL> ":" { return (new Yytoken(1,yytext(),yyline,yychar,yychar+1)); }
-<YYINITIAL> ";" { return (new Yytoken(2,yytext(),yyline,yychar,yychar+1)); }
-<YYINITIAL> "(" { return (new Yytoken(3,yytext(),yyline,yychar,yychar+1)); }
-<YYINITIAL> ")" { return (new Yytoken(4,yytext(),yyline,yychar,yychar+1)); }
-<YYINITIAL> "[" { return (new Yytoken(5,yytext(),yyline,yychar,yychar+1)); }
-<YYINITIAL> "]" { return (new Yytoken(6,yytext(),yyline,yychar,yychar+1)); }
-<YYINITIAL> "{" { return (new Yytoken(7,yytext(),yyline,yychar,yychar+1)); }
-<YYINITIAL> "}" { return (new Yytoken(8,yytext(),yyline,yychar,yychar+1)); }
-<YYINITIAL> "." { return (new Yytoken(9,yytext(),yyline,yychar,yychar+1)); }
-<YYINITIAL> "+" { return (new Yytoken(10,yytext(),yyline,yychar,yychar+1)); }
-<YYINITIAL> "-" { return (new Yytoken(11,yytext(),yyline,yychar,yychar+1)); }
-<YYINITIAL> "*" { return (new Yytoken(12,yytext(),yyline,yychar,yychar+1)); }
-<YYINITIAL> "/" { return (new Yytoken(13,yytext(),yyline,yychar,yychar+1)); }
-<YYINITIAL> "=" { return (new Yytoken(14,yytext(),yyline,yychar,yychar+1)); }
-<YYINITIAL> "<>" { return (new Yytoken(15,yytext(),yyline,yychar,yychar+2)); }
-<YYINITIAL> "<"  { return (new Yytoken(16,yytext(),yyline,yychar,yychar+1)); }
-<YYINITIAL> "<=" { return (new Yytoken(17,yytext(),yyline,yychar,yychar+2)); }
-<YYINITIAL> ">"  { return (new Yytoken(18,yytext(),yyline,yychar,yychar+1)); }
-<YYINITIAL> ">=" { return (new Yytoken(19,yytext(),yyline,yychar,yychar+2)); }
-<YYINITIAL> "&"  { return (new Yytoken(20,yytext(),yyline,yychar,yychar+1)); }
-<YYINITIAL> "|"  { return (new Yytoken(21,yytext(),yyline,yychar,yychar+1)); }
-<YYINITIAL> ":=" { return (new Yytoken(22,yytext(),yyline,yychar,yychar+2)); }
+ALPHA_NUMERIC=[A-Za-z0-9_]*
+
+TYPE_IDENTIFIER=[A-Z]{ALPHA_NUMERIC}
+OBJECT_IDENTIFIER=[a-z]{ALPHA_NUMERIC}
+
+CLASS=[(?i)class]
+INHERITS=[(?i)inherits]
+
+IF=[(?i)if]
+THEN=[(?i)then)]
+ELSE=[(?i)else)]
+FI=[(?i)fi)]
+
+WHILE=[(?i)while)]
+LOOP=[(?i)loop)]
+POOL=[(?i)pool)]
+
+LET=[(?i)let)]
+IN=[(?i)in)]
+
+CASE=[(?i)case)]
+OF=[(?i))of]
+ESAC=[(?i)esac]
+
+NEW=[(?i)new]
+ISVOID=[(?i)isvoid)]
+NOT=[(?i)not]
+
+TRUE=[t(?i)rue]
+FALSE=[f(?i)alse)]
 
 <YYINITIAL> {NONNEWLINE_WHITE_SPACE_CHAR}+ { }
 
