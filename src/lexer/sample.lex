@@ -52,7 +52,8 @@ class Yytoken {
 %%
 
 %line
-%char
+%state COMMENT_LINE
+%state COMMENT_SECTION
 
 ALPHA=[A-Za-z]
 INTEGER=[0-9]*
@@ -129,6 +130,10 @@ FALSE=[f(?i)alse)]
 <YYINITIAL> {NEWLINE} {}
 <YYINITIAL> {WHITESPACE} {}
 
+<YYINITIAL> "--" { yybegin(COMMENT_LINE); }
+<COMMENT_LINE> . {}
+<COMMENT_LINE> {NEWLINE} { yybegin(YYINITIAL); }
+<COMMENT_LINE> <<EOF>> { yybegin(YYINITIAL); }
 
 
 
