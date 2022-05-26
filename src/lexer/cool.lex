@@ -36,12 +36,14 @@ class Yytoken {
 %{
 	private int nestedCommentCount = 0;
 	private String currentString = "";
+
+	private boolean isCommentSection = false;
+	private boolean isString = false;
 %}
 
 %line
-%state COMMENT_LINE
-%state COMMENT_SECTION
-%state STRING 
+%char
+%state COMMENT_LINE, COMMENT_SECTION, STRING 
 
 ALPHA=[A-Za-z]
 INTEGER=[0-9]*
@@ -90,6 +92,18 @@ NOT=[nN][oO][tT]
 
 TRUE=t[rR][uU][eE]
 FALSE=f[aA][lL][sS][eE]
+
+%eofval{
+	if (isCommentSection) {
+		isCommentSection = false;
+		return new Yytoken(-5,"Unclosed comment section",yyline);
+	}
+	if (isString) {
+		isString = false;
+		return new Yytoken(-6,"Unclosed string",yyline);
+	}
+	return null;
+%eofval}
 
 %%
 
@@ -142,38 +156,40 @@ FALSE=f[aA][lL][sS][eE]
 
 <YYINITIAL> {INTEGER} { return new Yytoken(38,yytext(),yyline); }
 
-<YYINITIAL> {NEWLINE} {}
-<YYINITIAL> {WHITESPACE} {}
-
 <YYINITIAL> {OPEN_COMMENT_LINE} { yybegin(COMMENT_LINE); }
 <COMMENT_LINE> {NEWLINE} { yybegin(YYINITIAL); }
 <COMMENT_LINE> <<EOF>> { yybegin(YYINITIAL); }
+<COMMENT_LINE> {WHITESPACE} {}
 <COMMENT_LINE> . {}
 
-<YYINITIAL> {OPEN_COMMENT_SECTION} { yybegin(COMMENT_SECTION); }
+<YYINITIAL> {OPEN_COMMENT_SECTION} { yybegin(COMMENT_SECTION); isCommentSection = true; }
 
 <COMMENT_SECTION> {CLOSE_COMMENT_SECTION} {
-    System.out.println("1");
-    if (nestedCommentCount == 0)
-        yybegin(YYINITIAL);
-    else
-        nestedCommentCount--;
+	if (nestedCommentCount == 0) {
+		yybegin(YYINITIAL);
+		isCommentSection = false;
+	}
+	else {
+		nestedCommentCount--;
+	}
 }
 
 <COMMENT_SECTION> {OPEN_COMMENT_SECTION} { nestedCommentCount++; }
 
-<COMMENT_SECTION> <<EOF>> { return new Yytoken(-1,"Unclosed comment section",yyline); }
-
-<COMMENT_SECTION> . { }
+<COMMENT_SECTION> {WHITESPACE} {}
+<COMMENT_SECTION> {NEWLINE} {}
+<COMMENT_SECTION> . {}
 
 <YYINITIAL> {QUOTE} {
 	yybegin(STRING);
 	currentString = "";
+	isString = true;
 }
 
-<STRING> <<EOF>> { return new Yytoken(-2,"Unclosed string",yyline); }
-<STRING> {NEWLINE} { return new Yytoken(-3,"Not escaped newline character in string",yyline); }
-<STRING> {NULL_CHAR} { return new Yytoken(-4,"Null character in string",yyline); }
+<STRING> {BACKSLASH}{NEWLINE} { currentString += yytext(); }
+<STRING> {BACKSLASH}\r{NEWLINE} { currentString += yytext(); }
+<STRING> {NEWLINE} { return new Yytoken(-1,"Not escaped newline character in string",yyline); }
+<STRING> {NULL_CHAR} { return new Yytoken(-2,"Null character in string",yyline); }
 
 <STRING> {BACKSLASH}. {
 	var secondChar = yytext().charAt(1);
@@ -188,10 +204,15 @@ FALSE=f[aA][lL][sS][eE]
 
 <STRING> {QUOTE} { 
 	yybegin(YYINITIAL);
+	isString = false;
 	return new Yytoken(39,currentString,yyline);
 }
 
+<STRING> {WHITESPACE} { currentString += yytext(); }
 <STRING> . { currentString += yytext(); }
 
-<YYINITIAL> "*)" { return new Yytoken(-5,"Unexpected token",yyline); }
-<YYINITIAL> . { return new Yytoken(-5,"Unexpected token",yyline); }
+<YYINITIAL> {NEWLINE} {}
+<YYINITIAL> {WHITESPACE} {}
+
+<YYINITIAL> "*)" { return new Yytoken(-3,"Unexpected token",yyline); }
+<YYINITIAL> . { return new Yytoken(-4,"Unexpected token",yyline); }
