@@ -1,28 +1,33 @@
 import java.lang.System;
+import java.io.File;
+import java.io.FileInputStream;
 
-class Sample {
+class Program {
     public static void main(String[] argv) throws java.io.IOException {
-	Yylex yy = new Yylex(System.in);
-	Yytoken t;
-	while ((t = yy.yylex()) != null)
-	    System.out.println(t);
-    }
+		var file = new File(argv[0]);
+		var stream = new FileInputStream(file);
+
+		Yylex yy = new Yylex(stream);
+		Yytoken t;
+		while ((t = yy.yylex()) != null)
+			System.out.println(t);
+	}
 }
 
 class Yytoken {
   Yytoken (int index, String text, int line)
   {
-	m_index = index;
-	m_text = new String(text);
-	m_line = line;
+	this.index = index;
+	this.text = text;
+	this.line = line;
   }
 
-  public int m_index;
-  public String m_text;
-  public int m_line;
+  public int index;
+  public String text;
+  public int line;
 
   public String toString() {
-      return "Token #"+m_index+": "+m_text+" (line "+m_line+")";
+      return "Token #"+index+": "+text+" (line "+line+")";
   }
 }
 
@@ -45,6 +50,12 @@ WHITESPACE=[ \t\r\f\v]
 BACKSLASH=\\
 NEWLINE=\n
 NULL_CHAR=\0
+QUOTE=\"
+
+OPEN_COMMENT_LINE=\-\-
+
+OPEN_COMMENT_SECTION=\(\*
+CLOSE_COMMENT_SECTION=\*\)
 
 SELF=self
 SELF_TYPE=SELF_TYPE
@@ -134,19 +145,28 @@ FALSE=f[aA][lL][sS][eE]
 <YYINITIAL> {NEWLINE} {}
 <YYINITIAL> {WHITESPACE} {}
 
-<YYINITIAL> "--" { yybegin(COMMENT_LINE); }
-<COMMENT_LINE> . {}
+<YYINITIAL> {OPEN_COMMENT_LINE} { yybegin(COMMENT_LINE); }
 <COMMENT_LINE> {NEWLINE} { yybegin(YYINITIAL); }
 <COMMENT_LINE> <<EOF>> { yybegin(YYINITIAL); }
+<COMMENT_LINE> . {}
 
-<YYINITIAL> "(*" { yybegin(COMMENT_SECTION); }
-<COMMENT_SECTION> "(*" { nestedCommentCount++; }
-<COMMENT_SECTION> "*)" { if (--nestedCommentCount == 0) yybegin(YYINITIAL); }
-<COMMENT_SECTION> . { }
+<YYINITIAL> {OPEN_COMMENT_SECTION} { yybegin(COMMENT_SECTION); }
+
+<COMMENT_SECTION> {CLOSE_COMMENT_SECTION} {
+    System.out.println("1");
+    if (nestedCommentCount == 0)
+        yybegin(YYINITIAL);
+    else
+        nestedCommentCount--;
+}
+
+<COMMENT_SECTION> {OPEN_COMMENT_SECTION} { nestedCommentCount++; }
 
 <COMMENT_SECTION> <<EOF>> { return new Yytoken(-1,"Unclosed comment section",yyline); }
 
-<YYINITIAL> "\"" { 
+<COMMENT_SECTION> . { }
+
+<YYINITIAL> {QUOTE} {
 	yybegin(STRING);
 	currentString = "";
 }
@@ -166,9 +186,12 @@ FALSE=f[aA][lL][sS][eE]
 	}
 }
 
-<STRING> . { currentString += yytext(); }
+<STRING> {QUOTE} { 
+	yybegin(YYINITIAL);
+	return new Yytoken(39,currentString,yyline);
+}
 
-<STRING> "\"" { return new Yytoken(39,currentString,yyline); }
+<STRING> . { currentString += yytext(); }
 
 <YYINITIAL> "*)" { return new Yytoken(-5,"Unexpected token",yyline); }
 <YYINITIAL> . { return new Yytoken(-5,"Unexpected token",yyline); }
