@@ -54,31 +54,31 @@ ALPHA_NUMERIC=[A-Za-z0-9_]*
 TYPE_IDENTIFIER=[A-Z]{ALPHA_NUMERIC}
 OBJECT_IDENTIFIER=[a-z]{ALPHA_NUMERIC}
 
-CLASS=[(?i)class]
-INHERITS=[(?i)inherits]
+CLASS=[cC][lL][aA][sS][sS]
+INHERITS=[iI][nN][hH][eE][rR][iI][tT][sS]
 
-IF=[(?i)if]
-THEN=[(?i)then)]
-ELSE=[(?i)else)]
-FI=[(?i)fi)]
+IF=[iI][fF]
+THEN=[tT][hH][eE][nN]
+ELSE=[eE][lL][sS][eE]
+FI=[fF][iI]
 
-WHILE=[(?i)while)]
-LOOP=[(?i)loop)]
-POOL=[(?i)pool)]
+WHILE=[wW][hH][iI][lL][eE]
+LOOP=[lL][oO][oO][pP]
+POOL=[pP][oO][oO][lL]
 
-LET=[(?i)let)]
-IN=[(?i)in)]
+LET=[lL][eE][tT]
+IN=[iI][nN]
 
-CASE=[(?i)case)]
-OF=[(?i))of]
-ESAC=[(?i)esac]
+CASE=[cC][aA][sS][eE]
+OF=[oO][fF]
+ESAC=[eE][sS][aA][cC]
 
-NEW=[(?i)new]
-ISVOID=[(?i)isvoid)]
-NOT=[(?i)not]
+NEW=[nN][eE][wW]
+ISVOID=[iI][sS][vV][oO][iI][dD]
+NOT=[nN][oO][tT]
 
-TRUE=[t(?i)rue]
-FALSE=[f(?i)alse)]
+TRUE=t[rR][uU][eE]
+FALSE=f[aA][lL][sS][eE]
 
 %%
 
