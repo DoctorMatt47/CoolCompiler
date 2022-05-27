@@ -5,4 +5,6 @@ comment *)
 
 -- Some line 
 
-(* Unclosed comment
+(* Outer (* Inner Comment *) Comment*)
+
+(*  (* Unclosed comment *)
