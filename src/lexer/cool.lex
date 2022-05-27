@@ -156,6 +156,9 @@ FALSE=f[aA][lL][sS][eE]
 
 <YYINITIAL> {INTEGER} { return new Yytoken(38,yytext(),yyline); }
 
+<YYINITIAL> {SELF} { return new Yytoken(40,yytext(),yyline); }
+<YYINITIAL> {SELF_TYPE} { return new Yytoken(41,yytext(),yyline); }
+
 <YYINITIAL> {OPEN_COMMENT_LINE} { yybegin(COMMENT_LINE); }
 <COMMENT_LINE> {NEWLINE} { yybegin(YYINITIAL); }
 <COMMENT_LINE> <<EOF>> { yybegin(YYINITIAL); }
